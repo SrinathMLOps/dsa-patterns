@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two Pointers — DSA Patterns | Srinath Kaithoju</title>
+<style>
+  :root {
+    --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+    --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+    --blue: #58a6ff; --green: #3fb950; --orange: #d29922;
+    --red: #f85149; --purple: #a371f7;
+    --blue-bg: #0d419d; --green-bg: #033a16; --orange-bg: #4d2d00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+  h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.3rem; font-weight: 600; margin: 2rem 0 1rem; color: var(--blue); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+  h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+  p  { margin-bottom: 1rem; color: var(--text); }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-right: 6px; }
+  .badge-easy   { background: var(--green-bg);  color: var(--green); }
+  .badge-medium { background: var(--orange-bg); color: var(--orange); }
+  .badge-hard   { background: #4d0000;          color: var(--red); }
+  code { font-family: 'Fira Code', 'Consolas', monospace; font-size: 0.9em; background: var(--bg3); padding: 2px 6px; border-radius: 4px; color: var(--blue); }
+  pre  { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem; overflow-x: auto; margin: 1rem 0; }
+  pre code { background: none; padding: 0; color: #e6edf3; }
+  .highlight-green { color: var(--green); }
+  .highlight-blue  { color: var(--blue); }
+  .highlight-red   { color: var(--red); }
+  .highlight-orange{ color: var(--orange); }
+
+  /* ── INTERACTIVE WIDGET ─────────────────────── */
+  .widget { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; }
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .tab { padding: 8px 20px; cursor: pointer; font-size: 14px; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .panel { display: none; } .panel.active { display: block; }
+
+  .arr-wrap { display: flex; gap: 10px; justify-content: center; margin: 1.5rem 0; flex-wrap: wrap; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .cell-idx { font-size: 11px; color: var(--muted); }
+  .cell-box { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 20px; font-weight: 700; border: 2px solid var(--border); background: var(--bg3); color: var(--text); transition: all 0.3s; }
+  .cell-box.ptr-left  { background: var(--blue-bg);  border-color: var(--blue);  color: #fff; transform: scale(1.15); }
+  .cell-box.ptr-right { background: var(--green-bg); border-color: var(--green); color: #fff; transform: scale(1.15); }
+  .cell-box.found     { background: var(--orange-bg);border-color: var(--orange);color: #fff; }
+  .cell-ptr { font-size: 11px; font-weight: 700; height: 16px; }
+  .ptr-l { color: var(--blue); } .ptr-r { color: var(--green); }
+
+  .step-msg { background: var(--bg3); border-radius: 8px; padding: 1rem; font-size: 14px; line-height: 1.7; min-height: 60px; margin: 1rem 0; }
+  .sum-line { text-align: center; font-size: 20px; font-weight: 700; margin: 0.5rem 0; }
+  .result-ok  { background: var(--green-bg);  color: var(--green);  padding: 10px 16px; border-radius: 8px; font-weight: 600; text-align: center; margin: 0.5rem 0; }
+  .result-no  { background: #4d0000;           color: var(--red);    padding: 10px 16px; border-radius: 8px; font-weight: 600; text-align: center; margin: 0.5rem 0; }
+  .code-hl    { background: var(--blue-bg); border-radius: 6px; padding: 6px 12px; font-family: monospace; font-size: 13px; color: #fff; margin-top: 1rem; }
+
+  .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 1rem 0; }
+  button { padding: 8px 20px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg3); color: var(--text); cursor: pointer; font-size: 14px; transition: all 0.2s; }
+  button:hover:not(:disabled) { background: var(--border); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: var(--blue-bg); border-color: var(--blue); color: #fff; }
+  .btn-primary:hover:not(:disabled) { opacity: 0.85; }
+
+  .dots { display: flex; gap: 6px; justify-content: center; margin: 0.5rem 0; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background 0.2s; }
+  .dot.done { background: var(--green); } .dot.active { background: var(--blue); }
+
+  /* playground */
+  .pg-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .pg-row label { font-size: 14px; color: var(--muted); min-width: 180px; }
+  input[type=text], input[type=number] { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text); font-size: 14px; }
+  .pg-log { margin-top: 1rem; }
+  .pg-step { font-size: 13px; padding: 6px 10px; border-bottom: 1px solid var(--border); font-family: monospace; }
+
+  /* code explainer */
+  .code-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 10px; }
+  .code-card pre { background: var(--bg2); margin: 8px 0 4px; }
+  .code-card .explain { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* table */
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 14px; }
+  th { background: var(--bg3); padding: 8px 12px; text-align: left; border-bottom: 2px solid var(--border); color: var(--muted); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  tr:hover td { background: var(--bg2); }
+
+  .info-box  { background: #0d2340; border-left: 4px solid var(--blue);  padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: 14px; }
+  .tip-box   { background: #1e2d0e; border-left: 4px solid var(--green); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: 14px; }
+  footer { text-align: center; margin-top: 4rem; padding: 2rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+  a { color: var(--blue); text-decoration: none; } a:hover { text-decoration: underline; }
+  .nav { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .nav a { background: var(--bg2); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 13px; color: var(--muted); }
+  .nav a:hover { color: var(--text); border-color: var(--text); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="nav">
+    <a href="../index.html">← All Patterns</a>
+    <a href="https://github.com/SrinathMLOps/dsa-patterns" target="_blank">GitHub Repo</a>
+    <a href="https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/" target="_blank">LeetCode #167</a>
+  </div>
+
+  <div style="margin-bottom:1.5rem">
+    <span class="badge badge-easy">Easy → Hard</span>
+    <span class="badge" style="background:#1a1a2e;color:var(--purple)">Pattern 1 of 14</span>
+  </div>
+
+  <h1>Two Pointers</h1>
+  <p style="color:var(--muted);font-size:1.1rem;margin-bottom:2rem">
+    From absolute beginner to advanced — interactive lesson with live examples
+  </p>
+
+  <!-- ── INTERACTIVE WIDGET ───────────────────────────────── -->
+  <div class="widget">
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('lesson')">Lesson</div>
+      <div class="tab" onclick="showTab('playground')">Try it yourself</div>
+      <div class="tab" onclick="showTab('codex')">Code explained</div>
+    </div>
+
+    <!-- LESSON -->
+    <div class="panel active" id="panel-lesson">
+      <p style="font-size:13px;color:var(--muted)">
+        Array: <code>[2, 5, 8, 11, 14]</code> &nbsp;|&nbsp; Walking through 3 examples
+      </p>
+      <div class="arr-wrap" id="arr-wrap"></div>
+      <div class="dots" id="dots"></div>
+      <div class="sum-line" id="sum-line" style="display:none"></div>
+      <div class="step-msg" id="step-msg">Press Next Step to begin.</div>
+      <div id="result-div"></div>
+      <div class="btn-row">
+        <button onclick="prev()" id="btn-prev" disabled>← Previous</button>
+        <button class="btn-primary" onclick="next()" id="btn-next">Next step →</button>
+        <button onclick="reset()">Reset</button>
+      </div>
+      <div id="code-hl-div" style="display:none">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Running this line:</div>
+        <div class="code-hl" id="code-hl"></div>
+      </div>
+    </div>
+
+    <!-- PLAYGROUND -->
+    <div class="panel" id="panel-playground">
+      <h3 style="margin-top:0">Try with your own numbers</h3>
+      <div class="pg-row">
+        <label>Sorted array (comma separated):</label>
+        <input type="text" id="pg-arr" value="1,3,6,9,12,15" style="width:220px">
+      </div>
+      <div class="pg-row">
+        <label>Target sum:</label>
+        <input type="number" id="pg-target" value="18" style="width:80px">
+      </div>
+      <button class="btn-primary" onclick="runPG()">Run two pointers →</button>
+      <div class="pg-log" id="pg-log"></div>
+    </div>
+
+    <!-- CODE EXPLAINED -->
+    <div class="panel" id="panel-codex">
+      <h3 style="margin-top:0">Every line in plain English</h3>
+      <div class="code-card">
+        <pre><code><span class="highlight-blue">left</span>, <span class="highlight-green">right</span> = 0, len(arr) - 1</code></pre>
+        <div class="explain">Place <strong style="color:var(--blue)">left finger</strong> at position 0 (start of array). Place <strong style="color:var(--green)">right finger</strong> at the last position. These are your two pointers.</div>
+      </div>
+      <div class="code-card">
+        <pre><code>while <span class="highlight-blue">left</span> &lt; <span class="highlight-green">right</span>:</code></pre>
+        <div class="explain">Keep looping as long as left finger has not crossed right finger. When they meet — stop. We have checked all useful pairs.</div>
+      </div>
+      <div class="code-card">
+        <pre><code>s = arr[<span class="highlight-blue">left</span>] + arr[<span class="highlight-green">right</span>]</code></pre>
+        <div class="explain">Add the value under the left finger plus the value under the right finger. Store it in <code>s</code>.</div>
+      </div>
+      <div class="code-card">
+        <pre><code>if s == target:
+    return [<span class="highlight-blue">left</span>, <span class="highlight-green">right</span>]</code></pre>
+        <div class="explain">If the sum matches what we want — we found the answer! Return both positions.</div>
+      </div>
+      <div class="code-card">
+        <pre><code>elif s &lt; target:
+    <span class="highlight-blue">left</span> += 1</code></pre>
+        <div class="explain">Sum is TOO SMALL. We need a bigger number. Move left finger one step RIGHT (towards bigger values in the sorted array).</div>
+      </div>
+      <div class="code-card">
+        <pre><code>else:
+    <span class="highlight-green">right</span> -= 1</code></pre>
+        <div class="explain">Sum is TOO BIG. We need a smaller number. Move right finger one step LEFT (towards smaller values).</div>
+      </div>
+      <div class="tip-box">
+        <strong>Why is this O(n) not O(n²)?</strong><br>
+        Each pointer can only move inward — left can move right at most n times, right can move left at most n times. Total moves = at most 2n = O(n). A two-loop approach checks every pair = n² checks. For n=10,000: two pointers = 20,000 operations vs nested loops = 100,000,000 operations.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── WRITTEN EXPLANATION ───────────────────────────── -->
+  <h2>The Core Idea</h2>
+  <p>Two pointers works because the array is <strong>sorted</strong>. This gives us a superpower:</p>
+  <ul style="margin:0.5rem 0 1rem 1.5rem;line-height:2">
+    <li>Everything to the <strong>right</strong> is <strong>bigger</strong></li>
+    <li>Everything to the <strong>left</strong> is <strong>smaller</strong></li>
+  </ul>
+  <p>So when our sum is too small, we know exactly what to do — move left pointer right to get a bigger number. When too big, move right pointer left. We never need to backtrack or check everything.</p>
+
+  <div class="info-box">
+    <strong>The key insight:</strong> On a sorted array, if arr[left] + arr[right] is too small, then arr[left] + arr[right-1] is also too small (since arr[right-1] &lt; arr[right]). So we can safely skip arr[left] with any right pointer smaller than the current right. This is why we never miss any valid pair.
+  </div>
+
+  <h2>Step-by-Step Walkthrough</h2>
+  <pre><code>arr = [2, 5, 8, 11, 14]   target = 13
+
+Initial:   L=0(2)   R=4(14)
+           [2,  5,  8, 11, 14]
+            L               R
+
+Step 1:  2 + 14 = 16 > 13  TOO BIG  → R moves left
+           [2,  5,  8, 11, 14]
+            L           R
+
+Step 2:  2 + 11 = 13 = 13  MATCH ✅ → return [0, 3]
+           [2,  5,  8, 11, 14]
+            L        R</code></pre>
+
+  <h2>LeetCode Problems — Solve in This Order</h2>
+  <table>
+    <tr><th>#</th><th>Problem</th><th>Difficulty</th><th>Key learning</th></tr>
+    <tr><td>167</td><td><a href="https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/" target="_blank">Two Sum II</a></td><td><span class="badge badge-easy">Easy</span></td><td>Classic template — start here</td></tr>
+    <tr><td>125</td><td><a href="https://leetcode.com/problems/valid-palindrome/" target="_blank">Valid Palindrome</a></td><td><span class="badge badge-easy">Easy</span></td><td>Both pointers move inward checking chars</td></tr>
+    <tr><td>15</td><td><a href="https://leetcode.com/problems/3sum/" target="_blank">3Sum</a></td><td><span class="badge badge-medium">Medium</span></td><td>Fix one element, two pointers on the rest</td></tr>
+    <tr><td>11</td><td><a href="https://leetcode.com/problems/container-with-most-water/" target="_blank">Container With Most Water</a></td><td><span class="badge badge-medium">Medium</span></td><td>Maximise area by moving shorter side</td></tr>
+    <tr><td>42</td><td><a href="https://leetcode.com/problems/trapping-rain-water/" target="_blank">Trapping Rain Water</a></td><td><span class="badge badge-hard">Hard</span></td><td>Track max height from both sides</td></tr>
+  </table>
+
+  <h2>Copy-Paste Template</h2>
+  <pre><code>def two_sum_sorted(arr, target):
+    left, right = 0, len(arr) - 1
+
+    while left &lt; right:
+        current_sum = arr[left] + arr[right]
+
+        if current_sum == target:
+            return [left, right]       # found answer
+        elif current_sum &lt; target:
+            left += 1                  # need bigger — go right
+        else:
+            right -= 1                 # need smaller — go left
+
+    return [-1, -1]                    # no pair found</code></pre>
+
+</div>
+
+<footer>
+  <p>Srinath Kaithoju &nbsp;|&nbsp; Senior DevOps Engineer &nbsp;|&nbsp;
+    <a href="https://github.com/SrinathMLOps">GitHub</a> &nbsp;|&nbsp;
+    <a href="https://srinathkaithoju.com">Portfolio</a>
+  </p>
+  <p style="margin-top:8px">Part of the <a href="../index.html">DSA Patterns series</a> — Pattern 1 of 14</p>
+</footer>
+
+<script>
+const ARR=[2,5,8,11,14];
+const STEPS=[
+  {l:0,r:4,phase:'init',target:16,msg:'<strong>Start.</strong> <span style="color:#58a6ff">Left pointer</span> at position 0 (value 2). <span style="color:#3fb950">Right pointer</span> at position 4 (value 14). Array is sorted — that is the key requirement.',line:'left, right = 0, len(arr) - 1'},
+  {l:0,r:4,phase:'check',target:16,sum:16,msg:'Add values: <span style="color:#58a6ff">2</span> + <span style="color:#3fb950">14</span> = <strong>16</strong>. Target is <strong>16</strong>. They match!',line:'s = arr[left] + arr[right]'},
+  {l:0,r:4,phase:'found',target:16,sum:16,msg:'Sum equals target! Return positions [<span style="color:#58a6ff">0</span>, <span style="color:#3fb950">4</span>]. Values 2 and 14 add to 16.',line:'if s == target: return [left, right]',found:true},
+  {l:0,r:4,phase:'init',target:13,msg:'<strong>Example 2 — target = 13.</strong> Reset pointers. <span style="color:#58a6ff">Left</span> = 0 (value 2). <span style="color:#3fb950">Right</span> = 4 (value 14).',line:'left, right = 0, len(arr) - 1'},
+  {l:0,r:4,phase:'check',target:13,sum:16,msg:'<span style="color:#58a6ff">2</span> + <span style="color:#3fb950">14</span> = 16. Target = 13. 16 > 13 — <strong>too big</strong>! Move <span style="color:#3fb950">right pointer LEFT</span>.',line:'else: right -= 1'},
+  {l:0,r:3,phase:'check',target:13,sum:13,msg:'<span style="color:#58a6ff">2</span> + <span style="color:#3fb950">11</span> = 13. Target = 13. <strong>Match!</strong> Return [<span style="color:#58a6ff">0</span>, <span style="color:#3fb950">3</span>].',line:'if s == target: return [left, right]'},
+  {l:0,r:3,phase:'found',target:13,sum:13,msg:'Found! arr[0]=2 + arr[3]=11 = 13. Answer: [<span style="color:#58a6ff">0</span>, <span style="color:#3fb950">3</span>].',line:'return [left, right]',found:true},
+  {l:0,r:4,phase:'init',target:10,msg:'<strong>Example 3 — target = 10.</strong> Watch how we step through multiple times.',line:'left, right = 0, len(arr) - 1'},
+  {l:0,r:4,phase:'check',target:10,sum:16,msg:'2+14=16 > 10 — too big. Move <span style="color:#3fb950">right LEFT</span>.',line:'else: right -= 1'},
+  {l:0,r:3,phase:'check',target:10,sum:13,msg:'2+11=13 > 10 — still too big. Move <span style="color:#3fb950">right LEFT</span> again.',line:'else: right -= 1'},
+  {l:0,r:2,phase:'check',target:10,sum:10,msg:'<span style="color:#58a6ff">2</span> + <span style="color:#3fb950">8</span> = 10. <strong>Match!</strong> Return [<span style="color:#58a6ff">0</span>, <span style="color:#3fb950">2</span>].',line:'if s == target: return [left, right]'},
+  {l:0,r:2,phase:'found',target:10,sum:10,msg:'arr[0]=2 + arr[2]=8 = 10. Answer: [<span style="color:#58a6ff">0</span>, <span style="color:#3fb950">2</span>].',line:'return [left, right]',found:true},
+];
+let cur=-1;
+
+function renderArr(l,r,phase){
+  const w=document.getElementById('arr-wrap'); w.innerHTML='';
+  ARR.forEach((v,i)=>{
+    const cell=document.createElement('div'); cell.className='cell';
+    const idx=document.createElement('div'); idx.className='cell-idx'; idx.textContent='pos '+i;
+    const box=document.createElement('div'); box.className='cell-box';
+    if(phase==='found'&&(i===l||i===r)) box.classList.add('found');
+    else if(i===l) box.classList.add('ptr-left');
+    else if(i===r) box.classList.add('ptr-right');
+    box.textContent=v;
+    const ptr=document.createElement('div'); ptr.className='cell-ptr';
+    if(i===l&&i===r){ptr.innerHTML='<span class="ptr-l">L=R</span>';}
+    else if(i===l){ptr.innerHTML='<span class="ptr-l">L</span>';}
+    else if(i===r){ptr.innerHTML='<span class="ptr-r">R</span>';}
+    cell.append(idx,box,ptr); w.appendChild(cell);
+  });
+}
+function renderDots(total,active){
+  const d=document.getElementById('dots'); d.innerHTML='';
+  for(let i=0;i<total;i++){const dot=document.createElement('div');dot.className='dot'+(i<active?' done':i===active?' active':'');d.appendChild(dot);}
+}
+function next(){cur=Math.min(cur+1,STEPS.length-1);render();}
+function prev(){cur=Math.max(cur-1,0);render();}
+function reset(){cur=-1;renderArr(0,4,'init');renderDots(STEPS.length,-1);document.getElementById('step-msg').textContent='Press Next Step to begin.';document.getElementById('sum-line').style.display='none';document.getElementById('result-div').innerHTML='';document.getElementById('code-hl-div').style.display='none';document.getElementById('btn-prev').disabled=true;document.getElementById('btn-next').disabled=false;}
+function render(){
+  const s=STEPS[cur];
+  renderArr(s.l,s.r,s.phase); renderDots(STEPS.length,cur);
+  document.getElementById('step-msg').innerHTML=s.msg;
+  const sl=document.getElementById('sum-line');
+  if(s.sum!==undefined){sl.style.display='block';const c=s.sum===s.target?'#3fb950':s.sum>s.target?'#f85149':'#58a6ff';sl.innerHTML=`Sum = <span style="color:${c};font-weight:700">${s.sum}</span> &nbsp; Target = <strong>${s.target}</strong>`;}
+  else sl.style.display='none';
+  const rd=document.getElementById('result-div');
+  if(s.found){rd.innerHTML=`<div class="result-ok">Found! positions [${s.l}, ${s.r}] → values ${ARR[s.l]} + ${ARR[s.r]} = ${s.target}</div>`;}
+  else rd.innerHTML='';
+  const cd=document.getElementById('code-hl-div');
+  if(s.line){cd.style.display='block';document.getElementById('code-hl').textContent=s.line;}
+  document.getElementById('btn-prev').disabled=cur<=0;
+  document.getElementById('btn-next').disabled=cur>=STEPS.length-1;
+}
+function showTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['lesson','playground','codex'][i]===name));
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',['panel-lesson','panel-playground','panel-codex'][i]==='panel-'+name));
+}
+function runPG(){
+  const raw=document.getElementById('pg-arr').value;
+  const t=parseInt(document.getElementById('pg-target').value);
+  const a=raw.split(',').map(x=>parseInt(x.trim())).filter(x=>!isNaN(x)).sort((x,y)=>x-y);
+  const log=document.getElementById('pg-log');
+  if(a.length<2){log.innerHTML='<div style="color:var(--red);margin-top:12px">Need at least 2 numbers</div>';return;}
+  let html=`<div style="font-size:13px;color:var(--muted);margin:12px 0 6px">Sorted: [${a.join(', ')}] | Target: ${t}</div>`;
+  let l=0,r=a.length-1;
+  while(l<r){
+    const s=a[l]+a[r];
+    const verdict=s===t?`<span style="color:var(--green)">= target ✓</span>`:s<t?`<span style="color:var(--blue)">&lt; target → left++</span>`:`<span style="color:var(--red)">&gt; target → right--</span>`;
+    html+=`<div class="pg-step">left=${l}(${a[l]}) + right=${r}(${a[r]}) = ${s} &nbsp; ${verdict}</div>`;
+    if(s===t){html+=`<div class="result-ok" style="margin-top:10px">Found! ${a[l]} + ${a[r]} = ${t} at positions [${l}, ${r}]</div>`;log.innerHTML=html;return;}
+    else if(s<t)l++;else r--;
+  }
+  html+=`<div class="result-no" style="margin-top:10px">No pair found that sums to ${t}</div>`;
+  log.innerHTML=html;
+}
+renderArr(0,4,'init'); renderDots(STEPS.length,-1);
+</script>
+</body>
+</html>
